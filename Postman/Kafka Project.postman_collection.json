@@ -1,0 +1,44 @@
+{
+  "info": {
+    "_postman_id": "e3f4367d-ecf4-40fa-9dd0-ee7eba931ae9",
+    "name": "Kafka Project",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "57586499",
+    "_collection_link": "https://go.postman.co/collection/57586499-e3f4367d-ecf4-40fa-9dd0-ee7eba931ae9?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "Create Order",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n \"customerId\": 101,\r\n \"customerName\": \"Rahul\",\r\n \"productId\": 501,\r\n \"productName\": \"Laptop\",\r\n \"quantity\": 1,\r\n \"amount\": 75001,\r\n \"deliveryAddress\" : \"Banglore\"\r\n }",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:8080/orders",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "orders"
+          ]
+        }
+      },
+      "response": []
+    }
+  ]
+}
