@@ -15,8 +15,7 @@ import com.flipkart.payment.service.kafka.KafkaService;
 import tools.jackson.databind.ObjectMapper;
 
 @Service
-public class PaymentService
-{
+public class PaymentService {
 
 //	@Autowired
 //	private KafkaPaymentConsumer kafkaPaymentConsumer;
@@ -41,10 +40,10 @@ public class PaymentService
 //		this.kafkaPaymentConsumer = kafkaPaymentConsumer;
 //	}
 
-	public PaymentResponse processPayment(KafkaOrderResponse response)
-	{
-		if (paymentRepository.existsBySourceId(response.getEventId()))
-		{
+	public PaymentResponse processPayment(KafkaOrderResponse response) {
+		long startTime = System.currentTimeMillis();
+
+		if (paymentRepository.existsBySourceId(response.getEventId())) {
 			System.out.println("Duplicate event recieved" + response.getEventId());
 			return null;
 		}
@@ -63,22 +62,20 @@ public class PaymentService
 		int payId = 10000 + random.nextInt(90000);
 		paymentResponse.setPaymentId("TXN-" + payId);
 
-		
 		// Generates a random number from 0 to 99.
-		// Values below 80 represent successful payments, while 80–99 represent failures.
+		// Values below 80 represent successful payments, while 80–99 represent
+		// failures.
 		boolean isSuccess = random.nextInt(100) < 80;
 		String topicToUse;
 
-		if (isSuccess)
-		{
+		if (isSuccess) {
 			paymentResponse.setEventType("PAYMENT_SUCCESS");
 			paymentResponse.setPaymentMethod("UPI");
 			paymentResponse.setPaymentStatus("SUCCESS");
 
 			topicToUse = paymentSuccessTopic;
 
-		} else
-		{
+		} else {
 			paymentResponse.setEventType("PAYMENT_FAILED");
 			paymentResponse.setPaymentStatus("FAILED");
 			paymentResponse.setReason("INSUFFICIENT_FUNDS");
@@ -108,11 +105,14 @@ public class PaymentService
 
 		kafkaService.storingPaymentMessage(topicToUse, key, data);
 
+		long endTime = System.currentTimeMillis();
+
+		System.out.println("Payment processing time: " + (endTime - startTime) + " ms");
+
 		return paymentResponse;
 	}
 
-	private String objToJson(PaymentResponse paymentResponse)
-	{
+	private String objToJson(PaymentResponse paymentResponse) {
 		ObjectMapper mapper = new ObjectMapper();
 		String json = mapper.writeValueAsString(paymentResponse);
 		return json;

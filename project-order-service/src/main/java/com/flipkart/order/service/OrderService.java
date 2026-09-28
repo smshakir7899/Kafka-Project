@@ -17,8 +17,7 @@ import com.flipkart.order.service.kafka.KafkaService;
 import tools.jackson.databind.ObjectMapper;
 
 @Service
-public class OrderService
-{
+public class OrderService {
 	@Autowired
 	OrderRepository orderRepository;
 
@@ -29,8 +28,7 @@ public class OrderService
 	private String orderCreatedTopic;
 	// topic name comes from app properties not hard coding
 
-	public OrderResponse createOrder(OrderRequest orderRequest)
-	{
+	public OrderResponse createOrder(OrderRequest orderRequest) {
 		OrderEntity orderEntity = new OrderEntity();
 
 		System.out.println("OrderService.createOrder()::::::::::::::::::::::START");
@@ -54,22 +52,37 @@ public class OrderService
 		KafkaResponse kafkaResponse = new KafkaResponse();
 		Random random = new Random();
 
-		int eventId = 10000 + random.nextInt(90000);
-		kafkaResponse.setEventId("EVT-" + eventId);
+//		int eventId = 10000 + random.nextInt(90000);
+//		kafkaResponse.setEventId("EVT-" + eventId);
 //		kafkaResponse.setEventId("EVT-" + 83838); This is using for idempotency
 		kafkaResponse.setEventType("ORDER_CREATED");
-		kafkaResponse.setOrderId(responseEntity.getOrderId());
+//		kafkaResponse.setOrderId(responseEntity.getOrderId());
 		kafkaResponse.setCustomerId(responseEntity.getCustomerId());
 		kafkaResponse.setAmount(responseEntity.getAmount());
 		kafkaResponse.setDeliveryAddress(responseEntity.getDeliveryAddress());
 		kafkaResponse.setEventTime(LocalDateTime.now().toString());
 
-		if (orderRequest.getCustomerId() > 0)
-		{
-			String data = objToJson(kafkaResponse);
-			String key = String.valueOf(responseEntity.getOrderId());
-			kafkaService.storingOrderMessage(orderCreatedTopic, key, data);
+		long startTime = System.currentTimeMillis();
+		System.out.println(startTime);
+		if (orderRequest.getCustomerId() > 0) {
+
+			for (int i = 1; i <= 1000; i++) {
+
+				int orderId = 1000 + i;
+				int eventId = 10000 + i;
+				kafkaResponse.setOrderId(orderId);
+				kafkaResponse.setEventId("EVT-" + eventId);
+				String data = objToJson(kafkaResponse);
+				String key = String.valueOf(responseEntity.getOrderId());
+				kafkaService.storingOrderMessage(orderCreatedTopic, key, data);
+			}
 		}
+
+		long endTime = System.currentTimeMillis();
+		System.out.println(endTime);
+		
+		System.out.println("Total time: "+(endTime-startTime)+" ms");
+
 		System.out.println("OrderService.createOrder()::::::::::::::::::::::END");
 
 		return orderResponse;
@@ -82,8 +95,7 @@ public class OrderService
 //		return id;
 //	}
 
-	private String objToJson(KafkaResponse response)
-	{
+	private String objToJson(KafkaResponse response) {
 		ObjectMapper objectMapper = new ObjectMapper();
 		String json = objectMapper.writeValueAsString(response);
 		return json;
